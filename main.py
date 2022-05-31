@@ -27,7 +27,7 @@ SMALL_CACTUS = [pygame.image.load(r'Assets/Cactus/SmallCactus1.png'),
                 pygame.image.load(r'Assets/Cactus/SmallCactus2.png'),
                 pygame.image.load(r'Assets/Cactus/SmallCactus3.png')]
 BIRD = [pygame.image.load(r'Assets/Bird/Bird1.png'),
-        pygame.image.load(r'Assets/Bird/Bird1.png')]
+        pygame.image.load(r'Assets/Bird/Bird2.png')]
 
 CLOUD = pygame.image.load(r'Assets/Other/Cloud.png')
 
@@ -93,7 +93,7 @@ class Dinosaur:
 
 
         #set the state based on input
-        if user_input[pygame.K_UP] and not self.is_jumping:
+        if user_input[pygame.K_UP] and not self.is_jumping and self.dino_rect.y>=300:
             self.is_ducking = False
             self.is_running = False
             self.is_jumping = True
@@ -130,7 +130,6 @@ class Dinosaur:
         self.step_index +=1
 
     def jump(self):
-        if self.dino_rect.y<400:
             self.image = self.jump_images
             if(self.is_falling_faster):
                 self.jump_velocity -= 1
@@ -154,11 +153,73 @@ class Dinosaur:
         SCREEN.blit(self.image,(self.dino_rect.x,self.dino_rect.y))
 
 
+class Obstacle:
+    def __init__(self, image, type):
+        self.image = image
+        self.type = type
+        self.rect = self.image[self.type].get_rect()
+        self.rect.x = SCREEN_W
+
+    def update(self):
+        self.rect.x -= game_speed
+        if self.rect.x < -self.rect.width:
+            obstacles.pop()
+
+    def draw(self, SCREEN):
+        SCREEN.blit(self.image[self.type], self.rect)
+
+
+class SmallCactus(Obstacle):
+    def __init__(self, image):
+        self.type = random.randint(0, 2)
+        super().__init__(image, self.type)
+        self.rect.y = 325
+
+
+class LargeCactus(Obstacle):
+    def __init__(self, image):
+        self.type = random.randint(0, 2)
+        super().__init__(image, self.type)
+        self.rect.y = 300
+
+
+class Bird(Obstacle):
+    def __init__(self, image):
+        self.type = 0
+        super().__init__(image, self.type)
+        self.rect.y = 250
+        self.index = 0
+
+    def draw(self, SCREEN):
+        if self.index >=19:
+            self.index = 0
+
+        SCREEN.blit(self.image[self.index//10], self.rect)
+        self.index += 1
+
+
+
 def main():
-    global game_speed,x_position_background,y_position_background
+    global game_speed,x_position_background,y_position_background ,score , obstacles
+    obstacles = []
+    score =0
     game_speed=7
     x_position_background=0
     y_position_background=380
+
+    font =pygame.font.Font('freesansbold.ttf',20)
+
+    def score_handler():
+        global score,game_speed
+        score+=1
+
+        if score %100==0:
+            game_speed +=1
+        text = font.render(f'Points: {score}',True,(0,0,0))
+        text_rect = text.get_rect()
+        text_rect.center = (1000,40)
+        SCREEN.blit(text,text_rect)
+
 
     def background():
         global y_position_background,x_position_background
@@ -178,20 +239,42 @@ def main():
     dino = Dinosaur()
     cloud=  Cloud()
 
-
     while run:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
-        SCREEN.fill((255,255,255))
-        user_input = pygame.key.get_pressed()
-        background()
+
+        SCREEN.fill((255, 255, 255))
+        userInput = pygame.key.get_pressed()
+
         dino.draw(SCREEN)
-        dino.update(user_input)
+        dino.update(userInput)
+
+        if len(obstacles) == 0:
+            if random.randint(0, 2) == 0:
+                obstacles.append(SmallCactus(SMALL_CACTUS))
+            elif random.randint(0, 2) == 1:
+                obstacles.append(LargeCactus(LARGE_CACTUS))
+            elif random.randint(0, 2) == 2:
+                obstacles.append(Bird(BIRD))
+
+        for obstacle in obstacles:
+            obstacle.draw(SCREEN)
+            obstacle.update()
+            if dino.dino_rect.colliderect(obstacle.rect):
+                print("colision")
+
+        background()
+
         cloud.draw(SCREEN)
         cloud.update()
+
+        score_handler()
+
         clock.tick(60)
         pygame.display.update()
+
+
 
 
 if __name__ =='__main__':
