@@ -68,6 +68,7 @@ class Dinosaur:
         self.is_ducking = False
         self.is_running = True
         self.is_jumping = False
+        self.is_falling_faster=False
         self.jump_velocity = self.JUMP_V
         self.step_index =0
         self.image = self.run_images[0]
@@ -96,14 +97,22 @@ class Dinosaur:
             self.is_ducking = False
             self.is_running = False
             self.is_jumping = True
+            self.is_falling_faster = False
         elif user_input[pygame.K_DOWN] and not self.is_jumping:
             self.is_ducking = True
             self.is_running = False
             self.is_jumping = False
+            self.is_falling_faster = False
+        elif user_input[pygame.K_DOWN] and self.is_jumping:
+            self.is_ducking = False
+            self.is_running = False
+            self.is_jumping = True
+            self.is_falling_faster = True
         elif not (self.is_jumping or user_input[pygame.K_DOWN]):
             self.is_ducking = False
             self.is_running = True
             self.is_jumping = False
+            self.is_falling_faster = False
 
 
     def run(self):
@@ -121,14 +130,17 @@ class Dinosaur:
         self.step_index +=1
 
     def jump(self):
-        self.image = self.jump_images
-        if self.is_jumping:
-            self.dino_rect.y-=self.jump_velocity*4
-            self.jump_velocity -=0.8
-        #if self.dino_rect.y>=self.y_position:
-        if self.jump_velocity< - self.JUMP_V:
-            self.is_jumping=False
-            self.jump_velocity = self.JUMP_V
+        if self.dino_rect.y<400:
+            self.image = self.jump_images
+            if(self.is_falling_faster):
+                self.jump_velocity -= 1
+            if self.is_jumping:
+                self.dino_rect.y-=self.jump_velocity*2
+                self.jump_velocity -=0.4
+            #if self.dino_rect.y>=self.y_position:
+            if self.jump_velocity< - self.JUMP_V:
+                self.is_jumping=False
+                self.jump_velocity = self.JUMP_V
 
     def duck(self):
         self.image = self.duck_images[self.step_index//5]
@@ -144,7 +156,7 @@ class Dinosaur:
 
 def main():
     global game_speed,x_position_background,y_position_background
-    game_speed=14
+    game_speed=7
     x_position_background=0
     y_position_background=380
 
@@ -178,7 +190,7 @@ def main():
         dino.update(user_input)
         cloud.draw(SCREEN)
         cloud.update()
-        clock.tick(30)
+        clock.tick(60)
         pygame.display.update()
 
 
