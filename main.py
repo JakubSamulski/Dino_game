@@ -32,6 +32,7 @@ BIRD = [pygame.image.load(r'Assets/Bird/Bird1.png'),
 CLOUD = pygame.image.load(r'Assets/Other/Cloud.png')
 
 BACKGROUND = pygame.image.load(r'Assets/Other/Track.png')
+BACKGROUND_MENU = pygame.image.load(r'Assets/Other/main_menu_background.jpg')
 
 
 class Cloud:
@@ -197,6 +198,23 @@ class Bird(Obstacle):
         SCREEN.blit(self.image[self.index//10], self.rect)
         self.index += 1
 
+def mainMenu():
+
+
+    while True:
+        SCREEN.fill((255,255,255))
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit(0)
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                main()
+
+        pygame.display.update()
+
+
+
 
 
 def main():
@@ -242,6 +260,8 @@ def main():
     while run:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
+                pygame.quit()
+                exit(0)
                 run = False
 
         SCREEN.fill((255, 255, 255))
@@ -278,5 +298,5 @@ def main():
 
 
 if __name__ =='__main__':
-    main()
+    mainMenu()
 
