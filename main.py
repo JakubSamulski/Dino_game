@@ -152,7 +152,7 @@ class Dinosaur:
     def draw(self,SCREEN):
         ''' draws dino to the screen'''
         SCREEN.blit(self.image,(self.dino_rect.x,self.dino_rect.y))
-
+        pygame.draw.rect(SCREEN, (255, 0, 0), self.dino_rect, 2)
 
 class Obstacle:
     def __init__(self, image, type):
@@ -168,6 +168,7 @@ class Obstacle:
 
     def draw(self, SCREEN):
         SCREEN.blit(self.image[self.type], self.rect)
+        pygame.draw.rect(SCREEN, (255, 0, 0), self.rect, 2)
 
 
 class SmallCactus(Obstacle):
@@ -196,14 +197,41 @@ class Bird(Obstacle):
             self.index = 0
 
         SCREEN.blit(self.image[self.index//10], self.rect)
+        pygame.draw.rect(SCREEN,(255,0,0),self.rect,2)
         self.index += 1
 
+
+def deathScreen():
+    global score
+    font = pygame.font.Font('freesansbold.ttf', 40)
+    text = font.render(f"You died with: {score} points", True, (0, 0, 0))
+    text_rect = text.get_rect()
+    text_rect.center = (SCREEN_W//2, 200)
+
+    deadDino =DINO_DEAD
+    deadDino_rotated = pygame.transform.rotate(DINO_DEAD, 180)
+    while True:
+        SCREEN.fill((255, 255, 255))
+        SCREEN.blit(text, text_rect)
+        SCREEN.blit(deadDino,(SCREEN_W//2-100,300))
+        SCREEN.blit(deadDino_rotated, (SCREEN_W // 2, 300))
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit(0)
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                main()
+
+        pygame.display.update()
+
 def mainMenu():
-
-
+    font =pygame.font.Font('freesansbold.ttf',40)
+    text = font.render("Main menu",True,(0,0,0))
+    text_rect = text.get_rect()
+    text_rect.center=(SCREEN_W//2,200)
     while True:
         SCREEN.fill((255,255,255))
-
+        SCREEN.blit(text,text_rect)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -231,7 +259,7 @@ def main():
         global score,game_speed
         score+=1
 
-        if score %100==0:
+        if score %400==0:
             game_speed +=1
         text = font.render(f'Points: {score}',True,(0,0,0))
         text_rect = text.get_rect()
@@ -282,7 +310,7 @@ def main():
             obstacle.draw(SCREEN)
             obstacle.update()
             if dino.dino_rect.colliderect(obstacle.rect):
-                print("colision")
+                deathScreen()
 
         background()
 
