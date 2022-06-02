@@ -1,19 +1,22 @@
 import pygame
 import os
-
+import pygame_textinput
 import time
 import random
-#Constants
+from CustomTextbox import Textbox
+from Button import Button
+
+# Constants
 
 
 pygame.init()
-SCREEN_H=729
-SCREEN_W=1280
+SCREEN_H = 729
+SCREEN_W = 1280
 
-SCREEN = pygame.display.set_mode((SCREEN_W,SCREEN_H))
+SCREEN = pygame.display.set_mode((SCREEN_W, SCREEN_H))
 
-#Loading assets
-DINO_RUNNING = [pygame.image.load(r'Assets/Dino/DinoRun1.png'),pygame.image.load(r'Assets/Dino/DinoRun2.png')]
+# Loading assets
+DINO_RUNNING = [pygame.image.load(r'Assets/Dino/DinoRun1.png'), pygame.image.load(r'Assets/Dino/DinoRun2.png')]
 DINO_JUMPING = pygame.image.load(r'Assets/Dino/DinoJump.png')
 DINO_DUCKING = [pygame.image.load(r'Assets/Dino/DinoDuck1.png'),
                 pygame.image.load(r'Assets/Dino/DinoDuck2.png')]
@@ -37,13 +40,13 @@ BACKGROUND_MENU = pygame.image.load(r'Assets/Other/main_menu_background.jpg')
 
 class Cloud:
     def __init__(self):
-        self.x_position = SCREEN_W +random.randint(800,1000)
-        self.y_position = random.randint(50,100)
+        self.x_position = SCREEN_W + random.randint(800, 1000)
+        self.y_position = random.randint(50, 100)
         self.image = CLOUD
         self.width = self.image.get_width()
 
-    def draw(self,SCREEN):
-        SCREEN.blit(self.image,(self.x_position,self.y_position))
+    def draw(self, SCREEN):
+        SCREEN.blit(self.image, (self.x_position, self.y_position))
 
     def update(self):
         self.x_position -= game_speed
@@ -52,12 +55,10 @@ class Cloud:
             self.y = random.randint(50, 100)
 
 
-
-
 class Dinosaur:
-    x_position=80
+    x_position = 80
     y_position = 310
-    y_position_duck=340
+    y_position_duck = 340
     JUMP_V = 8.5
 
     def __init__(self):
@@ -65,22 +66,22 @@ class Dinosaur:
         self.run_images = DINO_RUNNING
         self.jump_images = DINO_JUMPING
 
-        #initial state of dino
+        # initial state of dino
         self.is_ducking = False
         self.is_running = True
         self.is_jumping = False
-        self.is_falling_faster=False
+        self.is_falling_faster = False
         self.jump_velocity = self.JUMP_V
-        self.step_index =0
+        self.step_index = 0
         self.image = self.run_images[0]
 
-        #draw a rectangle around dino for hitboxes
+        # draw a rectangle around dino for hitboxes
         self.dino_rect = self.image.get_rect()
         self.dino_rect.x = self.x_position
         self.dino_rect.y = self.y_position
 
-    #function called every gameLoop iteration
-    def update(self,user_input):
+    # function called every gameLoop iteration
+    def update(self, user_input):
         '''function that is called every frame and handles the state of the dino '''
         if self.is_ducking:
             self.duck()
@@ -88,13 +89,12 @@ class Dinosaur:
             self.run()
         if self.is_jumping:
             self.jump()
-        #for easier animations
-        if self.step_index>=10:
-            self.step_index=0
+        # for easier animations
+        if self.step_index >= 10:
+            self.step_index = 0
 
-
-        #set the state based on input
-        if user_input[pygame.K_UP] and not self.is_jumping and self.dino_rect.y>=300:
+        # set the state based on input
+        if user_input[pygame.K_UP] and not self.is_jumping and self.dino_rect.y >= 300:
             self.is_ducking = False
             self.is_running = False
             self.is_jumping = True
@@ -115,7 +115,6 @@ class Dinosaur:
             self.is_jumping = False
             self.is_falling_faster = False
 
-
     def run(self):
 
         '''
@@ -123,36 +122,37 @@ class Dinosaur:
         :return:
         '''
         # step index to make animations slower, every 5 frames or so
-        self.image = self.run_images[self.step_index//5]
-        #updating the hitbox of the dino
+        self.image = self.run_images[self.step_index // 5]
+        # updating the hitbox of the dino
         self.dino_rect = self.image.get_rect()
         self.dino_rect.x = self.x_position
         self.dino_rect.y = self.y_position
-        self.step_index +=1
+        self.step_index += 1
 
     def jump(self):
-            self.image = self.jump_images
-            if(self.is_falling_faster):
-                self.jump_velocity -= 1
-            if self.is_jumping:
-                self.dino_rect.y-=self.jump_velocity*2
-                self.jump_velocity -=0.4
-            #if self.dino_rect.y>=self.y_position:
-            if self.jump_velocity< - self.JUMP_V:
-                self.is_jumping=False
-                self.jump_velocity = self.JUMP_V
+        self.image = self.jump_images
+        if (self.is_falling_faster):
+            self.jump_velocity -= 1
+        if self.is_jumping:
+            self.dino_rect.y -= self.jump_velocity * 2
+            self.jump_velocity -= 0.4
+        # if self.dino_rect.y>=self.y_position:
+        if self.jump_velocity < - self.JUMP_V:
+            self.is_jumping = False
+            self.jump_velocity = self.JUMP_V
 
     def duck(self):
-        self.image = self.duck_images[self.step_index//5]
+        self.image = self.duck_images[self.step_index // 5]
         self.dino_rect = self.image.get_rect()
         self.dino_rect.x = self.x_position
         self.dino_rect.y = self.y_position_duck
         self.step_index += 1
 
-    def draw(self,SCREEN):
+    def draw(self, SCREEN):
         ''' draws dino to the screen'''
-        SCREEN.blit(self.image,(self.dino_rect.x,self.dino_rect.y))
+        SCREEN.blit(self.image, (self.dino_rect.x, self.dino_rect.y))
         pygame.draw.rect(SCREEN, (255, 0, 0), self.dino_rect, 2)
+
 
 class Obstacle:
     def __init__(self, image, type):
@@ -193,11 +193,11 @@ class Bird(Obstacle):
         self.index = 0
 
     def draw(self, SCREEN):
-        if self.index >=19:
+        if self.index >= 19:
             self.index = 0
 
-        SCREEN.blit(self.image[self.index//10], self.rect)
-        pygame.draw.rect(SCREEN,(255,0,0),self.rect,2)
+        SCREEN.blit(self.image[self.index // 10], self.rect)
+        pygame.draw.rect(SCREEN, (255, 0, 0), self.rect, 2)
         self.index += 1
 
 
@@ -206,84 +206,154 @@ def deathScreen():
     font = pygame.font.Font('freesansbold.ttf', 40)
     text = font.render(f"You died with: {score} points", True, (0, 0, 0))
     text_rect = text.get_rect()
-    text_rect.center = (SCREEN_W//2, 200)
+    text_rect.center = (SCREEN_W // 2, 200)
 
-    deadDino =DINO_DEAD
+    deadDino = DINO_DEAD
     deadDino_rotated = pygame.transform.rotate(DINO_DEAD, 180)
+
+    main_menu_button = Button(SCREEN, 550, 570, 220, 75, "Play Again")
+
     while True:
         SCREEN.fill((255, 255, 255))
         SCREEN.blit(text, text_rect)
-        SCREEN.blit(deadDino,(SCREEN_W//2-100,300))
+        SCREEN.blit(deadDino, (SCREEN_W // 2 - 100, 300))
         SCREEN.blit(deadDino_rotated, (SCREEN_W // 2, 300))
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit(0)
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                main()
 
+
+            if main_menu_button.is_clicked():
+                mainMenu()
+
+        main_menu_button.update()
         pygame.display.update()
 
-def mainMenu():
-    font =pygame.font.Font('freesansbold.ttf',40)
-    text = font.render("Main menu",True,(0,0,0))
+
+# TODO uprzątnąć ten bajzel
+def top_players():
+    font = pygame.font.Font('freesansbold.ttf', 40)
+    text = font.render("Top Players", True, (0, 0, 0))
     text_rect = text.get_rect()
-    text_rect.center=(SCREEN_W//2,200)
+    text_rect.center = (SCREEN_W // 2, 200)
+    return_button = Button(SCREEN, 550, 570, 220, 75, "Return")
     while True:
-        SCREEN.fill((255,255,255))
-        SCREEN.blit(text,text_rect)
+        SCREEN.fill((255, 255, 255))
+        SCREEN.blit(text, text_rect)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit(0)
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                main()
 
+        if return_button.is_clicked():
+            mainMenu()
+
+        return_button.update()
         pygame.display.update()
 
 
 
+def options():
+    font = pygame.font.Font('freesansbold.ttf', 40)
+    text = font.render("Options", True, (0, 0, 0))
+    text_rect = text.get_rect()
+    text_rect.center = (SCREEN_W // 2, 200)
+
+    return_button = Button(SCREEN, 550, 570, 220, 75, "Return")
+
+    while True:
+        SCREEN.fill((255, 255, 255))
+        SCREEN.blit(text, text_rect)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit(0)
+
+        if return_button.is_clicked():
+            mainMenu()
+            return
+
+
+        return_button.update()
+        pygame.display.update()
+
+
+
+def mainMenu():
+    font = pygame.font.Font('freesansbold.ttf', 40)
+    text = font.render("Main menu", True, (0, 0, 0))
+    text_rect = text.get_rect()
+    text_rect = (550, 200)
+
+    name_text_box = Textbox(562, 250, 200, 25, "type your name")
+    name_text_box.set_border_color((255, 255, 255))
+
+    play_button = Button(SCREEN, 550, 330, 220, 75, "Play")
+    top_players_button = Button(SCREEN, 550, 400, 220, 75, "Top Players")
+    options_button = Button(SCREEN, 550, 470, 220, 75, "Options")
+    while True:
+        SCREEN.fill((255, 255, 255))
+        SCREEN.blit(text, text_rect)
+
+        events = pygame.event.get()
+
+        if play_button.is_clicked():
+            main()
+        if top_players_button.is_clicked():
+            top_players()
+        if options_button.is_clicked():
+            options()
+
+
+
+        for event in events:
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit(0)
+
+        name_text_box.update(events, SCREEN)
+        play_button.update()
+        top_players_button.update()
+        options_button.update()
+        pygame.display.update()
 
 
 def main():
-    global game_speed,x_position_background,y_position_background ,score , obstacles
+    global game_speed, x_position_background, y_position_background, score, obstacles
     obstacles = []
-    score =0
-    game_speed=7
-    x_position_background=0
-    y_position_background=380
+    score = 0
+    game_speed = 7
+    x_position_background = 0
+    y_position_background = 380
 
-    font =pygame.font.Font('freesansbold.ttf',20)
+    font = pygame.font.Font('freesansbold.ttf', 20)
 
     def score_handler():
-        global score,game_speed
-        score+=1
+        global score, game_speed
+        score += 1
 
-        if score %400==0:
-            game_speed +=1
-        text = font.render(f'Points: {score}',True,(0,0,0))
+        if score % 400 == 0:
+            game_speed += 1
+        text = font.render(f'Points: {score}', True, (0, 0, 0))
         text_rect = text.get_rect()
-        text_rect.center = (1000,40)
-        SCREEN.blit(text,text_rect)
-
+        text_rect.center = (1000, 40)
+        SCREEN.blit(text, text_rect)
 
     def background():
-        global y_position_background,x_position_background
+        global y_position_background, x_position_background
         image_width = BACKGROUND.get_width()
-        SCREEN.blit(BACKGROUND,(x_position_background,y_position_background))
-        SCREEN.blit(BACKGROUND, (image_width+x_position_background, y_position_background))
-        if(x_position_background < -image_width):
+        SCREEN.blit(BACKGROUND, (x_position_background, y_position_background))
+        SCREEN.blit(BACKGROUND, (image_width + x_position_background, y_position_background))
+        if (x_position_background < -image_width):
             SCREEN.blit(BACKGROUND, (image_width + x_position_background, y_position_background))
-            x_position_background=0
+            x_position_background = 0
         x_position_background -= game_speed
 
-
-
-
     run = True
-    clock  = pygame.time.Clock()
+    clock = pygame.time.Clock()
     dino = Dinosaur()
-    cloud=  Cloud()
+    cloud = Cloud()
 
     while run:
         for event in pygame.event.get():
@@ -323,8 +393,5 @@ def main():
         pygame.display.update()
 
 
-
-
-if __name__ =='__main__':
+if __name__ == '__main__':
     mainMenu()
-
