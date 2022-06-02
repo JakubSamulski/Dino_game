@@ -61,9 +61,12 @@ def run() -> None:
 #run()
 counter=0
 while True:
-    if keyboard.is_pressed('k'):
-        counter+=1
-        im = pyautogui.screenshot(f'im{counter}.png',region=(500,860,400,100))
+    counter+=1
+    im = pyautogui.screenshot(region=(480,860,300,50))
 
-        im2arr = numpy.array(im)
-        print(im2arr)k
+    im2arr = numpy.array(im)
+    if(83,83,83) in im2arr:
+        pyautogui.keyDown('up')
+        pyautogui.keyUp('up')
+    else:
+        print("nie")
