@@ -43,11 +43,11 @@ BACKGROUND = pygame.image.load(r'Assets/Other/Track.png')
 BACKGROUND_MENU = pygame.image.load(r'Assets/Other/main_menu_background.jpg')
 
 # global parameters
-global game_speed, increase_after_points, small_cactus_prob, large_cactus_prob, bird_prob, name
+global game_speed, increase_after_points, small_cactus_prob, large_cactus_prob, bird_prob, name,GAME_SPEED
 small_cactus_prob = 0.33
 large_cactus_prob = 0.33
 bird_prob = 0.34
-game_speed = 7
+GAME_SPEED = 7
 increase_after_points = 400
 name = 'Guest'
 
@@ -275,6 +275,42 @@ class Bird(Obstacle):
         self.index += 1
 
 
+def write_scores(list,filename):
+    s=""
+    for elem in list:
+        s+=f'{elem[0]},{elem[1]}\n'
+    with open(filename,"w")as file:
+        file.write(s)
+
+def order_scores(filename):
+    with open(filename,'r') as file:
+        data = file.read().split('\n')
+        data.remove('')
+        for i in range(len(data)):
+            data[i] = data[i].split(',')
+            data[i][1] = int(data[i][1])
+        data.sort(key=lambda x:x[1],reverse=True)
+        write_scores(data,filename)
+
+
+def write_to_database(name,score):
+    s= f'{name},{score}\n'
+    with open('Scores.txt','a') as file:
+        file.write(s)
+
+    order_scores('Scores.txt')
+
+
+def read_from_database(filename):
+    with open(filename) as file:
+        data = file.read().split('\n')
+        data.remove('')
+        for i in range(len(data)):
+            data[i] = data[i].split(',')
+        return data
+
+
+
 def deathScreen():
 
     """
@@ -283,7 +319,7 @@ def deathScreen():
     """
 
     global score, name
-
+    write_to_database(name,score)
     font = pygame.font.Font('freesansbold.ttf', 40)
     text = font.render(f"You died with: {score} points", True, (0, 0, 0))
     text_rect = text.get_rect()
@@ -310,6 +346,7 @@ def deathScreen():
         main_menu_button.update()
         pygame.display.update()
 
+#TODO napisać github pages jako wiki/manual do gry/opcji
 
 # TODO uprzątnąć ten bajzel
 def top_players()->None:
@@ -322,10 +359,29 @@ def top_players()->None:
     font = pygame.font.Font('freesansbold.ttf', 40)
     text = font.render("Top Players", True, (0, 0, 0))
     text_rect = text.get_rect()
-    text_rect.center = (SCREEN_W // 2, 200)
-    return_button = Button(SCREEN, 550, 570, 220, 75, "Return")
+    text_rect.center = (SCREEN_W // 2+20, 150)
+    return_button = Button(SCREEN, 540, 570, 220, 75, "Return")
+
+    data = read_from_database('Scores.txt')
+
+    font_leaderboard = pygame.font.Font('freesansbold.ttf', 25)
+
+
+
+
+
     while True:
+
+
         SCREEN.fill((255, 255, 255))
+        for i, l in enumerate(data):
+            if(i>=10):
+                break
+            #print(l)
+            name,score = l[0],l[1]
+            SCREEN.blit(font_leaderboard.render(f'{i+1}.    '+name,True,(0,0,0)), (530, 220 + 25 * i))
+            SCREEN.blit(font_leaderboard.render(score, True, (0, 0, 0)), (530+200, 220 + 25 * i))
+
         SCREEN.blit(text, text_rect)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -345,7 +401,7 @@ def options():
     :return:
     """
 
-    global game_speed, increase_after_points, small_cactus_prob, large_cactus_prob, bird_prob
+    global  increase_after_points, small_cactus_prob, large_cactus_prob, bird_prob,GAME_SPEED
 
     #initalize top label
     font = pygame.font.Font('freesansbold.ttf', 40)
@@ -360,7 +416,7 @@ def options():
 
     # for changing game_speed parameter
     font = pygame.font.Font('freesansbold.ttf', 25)
-    game_speed_textbox = Textbox(550, 300, 110, 25, str(game_speed))
+    game_speed_textbox = Textbox(550, 300, 110, 25, str(GAME_SPEED))
     game_speed_label = font.render("Game speed: ", True, (0, 0, 0))
     game_speed_label_rect = game_speed_label.get_rect()
     game_speed_label_rect.center = (350, 312)
@@ -402,7 +458,7 @@ def options():
 
         if return_button.is_clicked():
             #set parameters
-            game_speed = int(game_speed_textbox.value)
+            GAME_SPEED = int(game_speed_textbox.value)
             increase_after_points = int(speed_increase_textbox.value)
             small_cactus_prob = int(small_cactus_prob_textbox.value) / 100
             large_cactus_prob = int(large_cactus_prob_textbox.value) / 100
@@ -419,6 +475,7 @@ def options():
         SCREEN.blit(bird_prob_label, bird_prob_label_rect)
 
         # update all elements
+
         game_speed_textbox.update(events, SCREEN)
         speed_increase_textbox.update(events, SCREEN)
         small_cactus_prob_textbox.update(events, SCREEN)
@@ -499,6 +556,7 @@ def main():
     x_position_background = 0
     y_position_background = 380
     font = pygame.font.Font('freesansbold.ttf', 20)
+    game_speed = GAME_SPEED
 
     def score_handler():
         """

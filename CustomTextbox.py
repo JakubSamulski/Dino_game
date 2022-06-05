@@ -1,7 +1,7 @@
 import pygame_textinput
 import pygame
 
-
+# TODO napisac to ładniej i zrobic walidacje
 class Textbox(pygame_textinput.TextInputVisualizer):
     def __init__(self, left=0, top=0, width=10, height=25, default_text=''):
 
