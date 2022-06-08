@@ -39,7 +39,7 @@ BACKGROUND = pygame.image.load(r'Assets/Other/Track.png')
 BACKGROUND_MENU = pygame.image.load(r'Assets/Other/main_menu_background.jpg')
 
 # global parameters
-global game_speed, increase_after_points, small_cactus_prob, large_cactus_prob, bird_prob, name,GAME_SPEED
+global game_speed, increase_after_points, small_cactus_prob, large_cactus_prob, bird_prob, name, GAME_SPEED
 small_cactus_prob = 0.33
 large_cactus_prob = 0.33
 bird_prob = 0.34
@@ -89,8 +89,8 @@ class Dinosaur:
     y_position_duck = 340
     JUMP_V = 8.5
 
-    def __init__(self)->None:
-        #loading assets
+    def __init__(self) -> None:
+        # loading assets
         self.duck_images = DINO_DUCKING
         self.run_images = DINO_RUNNING
         self.jump_images = DINO_JUMPING
@@ -109,8 +109,7 @@ class Dinosaur:
         self.dino_rect.x = self.x_position
         self.dino_rect.y = self.y_position
 
-
-    def update(self, user_input:Sequence[bool])->None:
+    def update(self, user_input: Sequence[bool]) -> None:
         """
         Function that handles and updates the state of the dino. Must be called every frame
         :param user_input: result of pygame.key.get_pressed()
@@ -148,12 +147,12 @@ class Dinosaur:
             self.is_jumping = False
             self.is_falling_faster = False
 
-    def run(self)-> None:
+    def run(self) -> None:
 
-        '''
+        """
         Function to handle running of the dino
         :return None:
-        '''
+        """
         # step index to make animations slower, every 5 frames or so
         self.image = self.run_images[self.step_index // 5]
 
@@ -163,14 +162,14 @@ class Dinosaur:
         self.dino_rect.y = self.y_position
         self.step_index += 1
 
-    def jump(self)->None:
+    def jump(self) -> None:
 
         """
         Function to handle jumping of the dino
         :return: None
         """
         self.image = self.jump_images
-        if (self.is_falling_faster):
+        if self.is_falling_faster:
             self.jump_velocity -= 1
         if self.is_jumping:
             self.dino_rect.y -= self.jump_velocity * 2
@@ -181,23 +180,23 @@ class Dinosaur:
             self.is_jumping = False
             self.jump_velocity = self.JUMP_V
 
-    def duck(self)->None:
+    def duck(self) -> None:
 
         """
         Function that handles ducking of the dino
         :return:
         """
-        #switch ducking image every 5 frames
+        # switch ducking image every 5 frames
         self.image = self.duck_images[self.step_index // 5]
 
-        #update rectangle around the dino
+        # update rectangle around the dino
         self.dino_rect = self.image.get_rect()
         self.dino_rect.x = self.x_position
         self.dino_rect.y = self.y_position_duck
 
         self.step_index += 1
 
-    def draw(self, SCREEN:pygame.display)->None:
+    def draw(self, SCREEN: pygame.display) -> None:
         """
 
         :param SCREEN:
@@ -206,9 +205,8 @@ class Dinosaur:
         SCREEN.blit(self.image, (self.dino_rect.x, self.dino_rect.y))
 
 
-
 class Obstacle:
-    def __init__(self, image: list[Union[pygame.Surface, SurfaceType]], type:int)->None:
+    def __init__(self, image: list[Union[pygame.Surface, SurfaceType]], type: int) -> None:
         """
         initializes the obstacle
         :param image: list of images of the obstacle
@@ -219,7 +217,7 @@ class Obstacle:
         self.rect = self.image[self.type].get_rect()
         self.rect.x = SCREEN_W
 
-    def update(self)-> None:
+    def update(self) -> None:
         """
         Function to update position of obstacle. Must be called every frame
         :return: None
@@ -228,7 +226,7 @@ class Obstacle:
         if self.rect.x < -self.rect.width:
             obstacles.pop()
 
-    def draw(self, SCREEN:pygame.display)-> None:
+    def draw(self, SCREEN: pygame.display) -> None:
         """
         Function to draw obstacle to
         :param SCREEN:
@@ -260,38 +258,31 @@ class Bird(Obstacle):
         self.rect.y = 250
         self.index = 0
 
-    def draw(self, SCREEN:pygame.display)->None:
-        #need to override because its a animated obstacle
+    def draw(self, SCREEN: pygame.display) -> None:
+        # need to override because its a animated obstacle
         if self.index >= 19:
             self.index = 0
 
         SCREEN.blit(self.image[self.index // 10], self.rect)
         self.index += 1
 
-def validate(gamespeed:str,increase_afer:str,prob1:str,prob2:str,prob3:str)->bool:
+
+def validate(game_speed_v: str, increase_after: str, prob1: str, prob2: str, prob3: str) -> bool:
     try:
-        gamespeed = int(gamespeed)
-        increase_afer = int(increase_afer)
-        prob1=int(prob1)
+        game_speed_v = int(game_speed_v)
+        increase_after = int(increase_after)
+        prob1 = int(prob1)
         prob2 = int(prob2)
         prob3 = int(prob3)
     except:
         return False
-    return gamespeed>0 and increase_afer>0 and (prob1+prob2+prob3)==100
+    return game_speed_v > 0 and increase_after > 0 and (prob1 + prob2 + prob3) == 100
 
 
+\
 
-
-def write_scores(list,filename):
-    s=""
-    for elem in list:
-        s+=f'{elem[0]},{elem[1]}\n'
-    with open(filename,"w")as file:
-        file.write(s)
-
-
-def write_to_database(name,score):
-    name = name[:9]
+def write_to_database(name_d, score_d):
+    name_d = name_d[:9]
     try:
         conn = mariadb.connect(
             user="root",
@@ -307,21 +298,14 @@ def write_to_database(name,score):
     except mariadb.Error as e:
         cur.execute("CREATE DATABASE Dino_Game")
         cur.execute("use Dino_Game")
-        cur.execute("CREATE TABLE leaderboard(id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,name VARCHAR(9),score INT(10) UNSIGNED NOT NULL)")
-    cur.execute("INSERT INTO leaderboard(name,score) VALUES (?,?)", (name, score))
+        cur.execute(
+            "CREATE TABLE leaderboard(id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,name VARCHAR(9),score INT(10) UNSIGNED NOT NULL)")
+    cur.execute("INSERT INTO leaderboard(name,score) VALUES (?,?)", (name_d, score_d))
     conn.commit()
     conn.close()
 
 
-
-
-def read_from_database(filename):
-    # with open(filename) as file:
-    #     data = file.read().split('\n')
-    #     data.remove('')
-    #     for i in range(len(data)):
-    #         data[i] = data[i].split(',')
-    #     return data
+def read_from_database():
     data = []
     try:
         conn = mariadb.connect(
@@ -335,20 +319,20 @@ def read_from_database(filename):
     cur = conn.cursor()
     cur.execute("use Dino_Game")
     cur.execute("SELECT name,score FROM leaderboard ORDER BY score DESC")
-    for (name, score) in cur:
-        data.append((name,str(score)))
+    for (name_r, score_r) in cur:
+        data.append((name_r, str(score_r)))
     conn.close()
     return data
 
-def deathScreen():
 
+def deathScreen():
     """
     Function to draw a death screen
     :return:-> None
     """
 
     global score, name
-    write_to_database(name,score)
+    write_to_database(name, score)
     font = pygame.font.Font('freesansbold.ttf', 40)
     text = font.render(f"You died with: {score} points", True, (0, 0, 0))
     text_rect = text.get_rect()
@@ -369,17 +353,14 @@ def deathScreen():
                 exit(0)
 
             if main_menu_button.is_clicked():
-                mainMenu()
+                main_menu()
 
         main_menu_button.update()
         pygame.display.update()
 
-#TODO napisać github pages jako wiki/manual do gry/opcji
-
-# TODO uprzątnąć ten bajzel
-def top_players()->None:
 
 
+def top_players() -> None:
     """
     Function to draw leaderboard screen
     :return: None
@@ -387,28 +368,23 @@ def top_players()->None:
     font = pygame.font.Font('freesansbold.ttf', 40)
     text = font.render("Top Players", True, (0, 0, 0))
     text_rect = text.get_rect()
-    text_rect.center = (SCREEN_W // 2+20, 150)
+    text_rect.center = (SCREEN_W // 2 + 20, 150)
     return_button = Button(SCREEN, 540, 570, 220, 75, "Return")
 
-    data = read_from_database('Scores.txt')
+    data = read_from_database()
 
     font_leaderboard = pygame.font.Font('freesansbold.ttf', 25)
 
-
-
-
-
     while True:
-
 
         SCREEN.fill((255, 255, 255))
         for i, l in enumerate(data):
-            if(i>=10):
+            if i >= 10:
                 break
-            #print(l)
-            name,score = l[0],l[1]
-            SCREEN.blit(font_leaderboard.render(f'{i+1}.    '+name,True,(0,0,0)), (530, 220 + 25 * i))
-            SCREEN.blit(font_leaderboard.render(score, True, (0, 0, 0)), (530+200, 220 + 25 * i))
+            # print(l)
+            name_l, score_l = l[0], l[1]
+            SCREEN.blit(font_leaderboard.render(f'{i + 1}.    ' + name_l, True, (0, 0, 0)), (530, 220 + 25 * i))
+            SCREEN.blit(font_leaderboard.render(score_l, True, (0, 0, 0)), (530 + 200, 220 + 25 * i))
 
         SCREEN.blit(text, text_rect)
         for event in pygame.event.get():
@@ -417,11 +393,10 @@ def top_players()->None:
                 exit(0)
 
         if return_button.is_clicked():
-            mainMenu()
+            main_menu()
 
         return_button.update()
         pygame.display.update()
-
 
 
 def options():
@@ -430,52 +405,50 @@ def options():
     :return:
     """
 
-    global  increase_after_points, small_cactus_prob, large_cactus_prob, bird_prob,GAME_SPEED
+    global increase_after_points, small_cactus_prob, large_cactus_prob, bird_prob, GAME_SPEED
 
-    #initalize top label
+    # initialize top label
     font = pygame.font.Font('freesansbold.ttf', 40)
     text = font.render("Options", True, (0, 0, 0))
     text_rect = text.get_rect()
     text_rect.center = (SCREEN_W // 2, 200)
 
-    #initialize return button
+    # initialize return button
     return_button = Button(SCREEN, 550, 570, 220, 75, "Return")
 
-    # TODO add validation
 
     # for changing game_speed parameter
     font = pygame.font.Font('freesansbold.ttf', 25)
-    game_speed_textbox = Textbox(550, 300, 110, 25, str(GAME_SPEED))
+    game_speed_textbox = Textbox(800, 300, 110, 25, str(GAME_SPEED))
     game_speed_label = font.render("Game speed: ", True, (0, 0, 0))
     game_speed_label_rect = game_speed_label.get_rect()
-    game_speed_label_rect.center = (350, 312)
+    game_speed_label_rect.center = (550, 312)
 
     # for changing speed_increase_after parameter
-    speed_increase_textbox = Textbox(550, 350, 110, 25, str(increase_after_points))
+    speed_increase_textbox = Textbox(800, 350, 110, 25, str(increase_after_points))
     speed_increase_label = font.render("increase speed after points:", True, (0, 0, 0))
     speed_increase_label_rect = game_speed_label.get_rect()
-    speed_increase_label_rect.center = (250, 362)
+    speed_increase_label_rect.center = (450, 362)
 
     # for changing small_cactus_prob parameter
-    small_cactus_prob_textbox = Textbox(550, 400, 110, 25, str(int(small_cactus_prob * 100)))
+    small_cactus_prob_textbox = Textbox(800, 400, 110, 25, str(int(small_cactus_prob * 100)))
     small_cactus_prob_label = font.render("Small cactus probability :", True, (0, 0, 0))
     small_cactus_prob_label_rect = small_cactus_prob_label.get_rect()
-    small_cactus_prob_label_rect.center = (344, 412)
+    small_cactus_prob_label_rect.center = (544, 412)
 
     # for large cactus_prob
-    large_cactus_prob_textbox = Textbox(550, 450, 110, 25, str(int(large_cactus_prob * 100)))
+    large_cactus_prob_textbox = Textbox(800, 450, 110, 25, str(int(large_cactus_prob * 100)))
     large_cactus_prob_label = font.render("large cactus probability :", True, (0, 0, 0))
     large_cactus_prob_label_rect = large_cactus_prob_label.get_rect()
-    large_cactus_prob_label_rect.center = (344, 462)
+    large_cactus_prob_label_rect.center = (544, 462)
 
     # for bird_prob
-    bird_prob_textbox = Textbox(550, 500, 110, 25, str(int(bird_prob * 100)))
+    bird_prob_textbox = Textbox(800, 500, 110, 25, str(int(bird_prob * 100)))
     bird_prob_label = font.render("bird probability :", True, (0, 0, 0))
     bird_prob_label_rect = bird_prob_label.get_rect()
-    bird_prob_label_rect.center = (344, 512)
+    bird_prob_label_rect.center = (544, 512)
 
-
-    #main loop
+    # main loop
     while True:
         SCREEN.fill((255, 255, 255))
         events = pygame.event.get()
@@ -486,20 +459,22 @@ def options():
                 exit(0)
 
         if return_button.is_clicked():
-           if validate(game_speed_textbox.value,speed_increase_textbox.value,small_cactus_prob_textbox.value,large_cactus_prob_textbox.value,bird_prob_textbox.value):
-            #set parameters
+            if validate(game_speed_textbox.value, speed_increase_textbox.value, small_cactus_prob_textbox.value,
+                        large_cactus_prob_textbox.value, bird_prob_textbox.value):
+                # set parameters
                 GAME_SPEED = int(game_speed_textbox.value)
                 increase_after_points = int(speed_increase_textbox.value)
                 small_cactus_prob = int(small_cactus_prob_textbox.value) / 100
                 large_cactus_prob = int(large_cactus_prob_textbox.value) / 100
                 bird_prob = int(bird_prob_textbox.value) / 100
-                mainMenu()
-           else:
+                main_menu()
+            else:
                 Tk().wm_withdraw()  # to hide the main window
                 messagebox.showinfo('error'
-                                    , 'make sure that all the settings are integers and that probabilities adds up to 100')
+                                    ,
+                                    'make sure that all the settings are integers and that probabilities adds up to 100')
 
-        #blit labels every frame
+        # blit labels every frame
         SCREEN.blit(text, text_rect)
         SCREEN.blit(game_speed_label, game_speed_label_rect)
         SCREEN.blit(speed_increase_label, speed_increase_label_rect)
@@ -518,39 +493,43 @@ def options():
         pygame.display.update()
 
 
-def mainMenu():
-
-
+def main_menu():
     """
     function to draw and handle main menu
     :return:
     """
     global name
 
-    #initalize top label
+    # initialize top label
     font = pygame.font.Font('freesansbold.ttf', 40)
     text = font.render("Main menu", True, (0, 0, 0))
     text_rect = text.get_rect()
     text_rect = (550, 200)
 
-    #initialize name text box
+    #dino models in corners
+    dino_up = DINO_START
+
+    # initialize name text box
     name_text_box = Textbox(562, 250, 200, 25, 'type your name')
     if name != 'Guest':
         name_text_box.value = name
     name_text_box.set_border_color((255, 255, 255))
 
-    #initialize buttons
+    # initialize buttons
     play_button = Button(SCREEN, 550, 330, 220, 75, "Play")
     top_players_button = Button(SCREEN, 550, 400, 220, 75, "Top Players")
     options_button = Button(SCREEN, 550, 470, 220, 75, "Options")
 
-    #main loop
+    # main loop
     while True:
+
+
         SCREEN.fill((255, 255, 255))
         SCREEN.blit(text, text_rect)
+        SCREEN.blit(dino_up,(620,115))
         events = pygame.event.get()
 
-        #handle button clicks
+        # handle button clicks
         if play_button.is_clicked():
             if name_text_box.value == 'type your name':
                 name = 'Guest'
@@ -567,7 +546,6 @@ def mainMenu():
                 pygame.quit()
                 exit(0)
 
-
         # update all elements
         name_text_box.update(events, SCREEN)
         play_button.update()
@@ -581,7 +559,7 @@ def main():
     main game function
     :return:
     """
-    #initialize all variables
+    # initialize all variables
     global game_speed, x_position_background, y_position_background, score, obstacles, increase_after_points
     global small_cactus_prob, large_cactus_prob, bird_prob
     obstacles = []
@@ -603,12 +581,11 @@ def main():
         if score % increase_after_points == 0:
             game_speed += 1
 
-        #update score label
+        # update score label
         text = font.render(f'Points: {score}', True, (0, 0, 0))
         text_rect = text.get_rect()
         text_rect.center = (1000, 40)
         SCREEN.blit(text, text_rect)
-
 
     def background():
         """
@@ -616,22 +593,21 @@ def main():
         :return:
         """
 
-        #initialize variables
+        # initialize variables
         global y_position_background, x_position_background
         image_width = BACKGROUND.get_width()
-
 
         # blit two backgrounds in case one ends mid frame
         SCREEN.blit(BACKGROUND, (x_position_background, y_position_background))
         SCREEN.blit(BACKGROUND, (image_width + x_position_background, y_position_background))
 
-        #background gets off screen
+        # background gets off screen
         if x_position_background < -image_width:
             SCREEN.blit(BACKGROUND, (image_width + x_position_background, y_position_background))
             x_position_background = 0
         x_position_background -= game_speed
 
-    #initialize parameters
+    # initialize parameters
     run = True
     clock = pygame.time.Clock()
     dino = Dinosaur()
@@ -650,7 +626,7 @@ def main():
         dino.draw(SCREEN)
         dino.update(userInput)
 
-        #handle obstacles generation
+        # handle obstacles generation
         if len(obstacles) == 0:
             population = [0, 1, 2]
             weights = [small_cactus_prob, large_cactus_prob, bird_prob]
@@ -662,22 +638,23 @@ def main():
                 obstacles.append(LargeCactus(LARGE_CACTUS))
             elif choice == 2:
                 obstacles.append(Bird(BIRD))
-        #draw obstacles
+        # draw obstacles
         for obstacle in obstacles:
             obstacle.draw(SCREEN)
             obstacle.update()
             if dino.dino_rect.colliderect(obstacle.rect):
                 deathScreen()
 
-        #update all left elements
+        # update all left elements
         background()
         cloud.draw(SCREEN)
         cloud.update()
         score_handler()
 
-        #set frame rate
+        # set frame rate
         clock.tick(60)
         pygame.display.update()
 
+
 if __name__ == '__main__':
-    mainMenu()
+    main_menu()
