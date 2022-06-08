@@ -50,10 +50,10 @@ name = 'Guest'
 
 class Cloud:
     def __init__(self):
-        '''
+        """
             initializes cloud
             sets position and loads image
-        '''
+        """
         self.x_position = SCREEN_W + random.randint(800, 1000)
         self.y_position = random.randint(50, 100)
         self.image = CLOUD
@@ -61,12 +61,12 @@ class Cloud:
         self.y = None
 
     def draw(self, SCREEN: pygame.display) -> None:
-        '''
+        """
         draws cloud to the SCREEN
         must be called every frame
         :param SCREEN: pygame display to draw to
         :return: None
-        '''
+        """
         SCREEN.blit(self.image, (self.x_position, self.y_position))
 
     def update(self):
@@ -206,14 +206,14 @@ class Dinosaur:
 
 
 class Obstacle:
-    def __init__(self, image: list[Union[pygame.Surface, SurfaceType]], type: int) -> None:
+    def __init__(self, image: list[Union[pygame.Surface, SurfaceType]], type_obs: int) -> None:
         """
         initializes the obstacle
         :param image: list of images of the obstacle
-        :param type: integer 0<=type<count of images
+        :param type_obs: integer 0<=type<count of images
         """
         self.image = image
-        self.type = type
+        self.type = type_obs
         self.rect = self.image[self.type].get_rect()
         self.rect.x = SCREEN_W
 
@@ -274,12 +274,10 @@ def validate(game_speed_v: str, increase_after: str, prob1: str, prob2: str, pro
         prob1 = int(prob1)
         prob2 = int(prob2)
         prob3 = int(prob3)
-    except:
+    except ValueError:
         return False
     return game_speed_v > 0 and increase_after > 0 and (prob1 + prob2 + prob3) == 100
 
-
-\
 
 def write_to_database(name_d, score_d):
     name_d = name_d[:9]
@@ -359,7 +357,6 @@ def deathScreen():
         pygame.display.update()
 
 
-
 def top_players() -> None:
     """
     Function to draw leaderboard screen
@@ -415,7 +412,6 @@ def options():
 
     # initialize return button
     return_button = Button(SCREEN, 550, 570, 220, 75, "Return")
-
 
     # for changing game_speed parameter
     font = pygame.font.Font('freesansbold.ttf', 25)
@@ -503,10 +499,9 @@ def main_menu():
     # initialize top label
     font = pygame.font.Font('freesansbold.ttf', 40)
     text = font.render("Main menu", True, (0, 0, 0))
-    text_rect = text.get_rect()
     text_rect = (550, 200)
 
-    #dino models in corners
+    # dino models in corners
     dino_up = DINO_START
 
     # initialize name text box
@@ -523,10 +518,9 @@ def main_menu():
     # main loop
     while True:
 
-
         SCREEN.fill((255, 255, 255))
         SCREEN.blit(text, text_rect)
-        SCREEN.blit(dino_up,(620,115))
+        SCREEN.blit(dino_up, (620, 115))
         events = pygame.event.get()
 
         # handle button clicks
