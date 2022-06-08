@@ -47,6 +47,13 @@ class Textbox(pygame_textinput.TextInputVisualizer):
     def get_text(self):
         return self.value
 
+
+
+
+
+
+
+
     def update(self, events: pygame.event.Event, SCREEN):
         '''
         function called every frame

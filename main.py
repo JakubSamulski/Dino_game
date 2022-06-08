@@ -4,8 +4,11 @@ import pygame
 import os
 import pygame_textinput
 import time
+import sys
+import mariadb
 import random
-
+from tkinter import *
+from tkinter import messagebox
 from pygame.surface import SurfaceType
 
 from CustomTextbox import Textbox
@@ -274,6 +277,19 @@ class Bird(Obstacle):
         pygame.draw.rect(SCREEN, (255, 0, 0), self.rect, 2)
         self.index += 1
 
+def validate(gamespeed:str,increase_afer:str,prob1:str,prob2:str,prob3:str)->bool:
+    try:
+        gamespeed = int(gamespeed)
+        increase_afer = int(increase_afer)
+        prob1=int(prob1)
+        prob2 = int(prob2)
+        prob3 = int(prob3)
+    except:
+        return False
+    return gamespeed>0 and increase_afer>0 and (prob1+prob2+prob3)==100
+
+
+
 
 def write_scores(list,filename):
     s=""
@@ -282,34 +298,55 @@ def write_scores(list,filename):
     with open(filename,"w")as file:
         file.write(s)
 
-def order_scores(filename):
-    with open(filename,'r') as file:
-        data = file.read().split('\n')
-        data.remove('')
-        for i in range(len(data)):
-            data[i] = data[i].split(',')
-            data[i][1] = int(data[i][1])
-        data.sort(key=lambda x:x[1],reverse=True)
-        write_scores(data,filename)
-
 
 def write_to_database(name,score):
-    s= f'{name},{score}\n'
-    with open('Scores.txt','a') as file:
-        file.write(s)
+    try:
+        conn = mariadb.connect(
+            user="root",
+            password="kubasam",
+            host="127.0.0.1",
+        )
+    except mariadb.Error as e:
+        print(f"Error connecting to MariaDB Platform: {e}")
+        sys.exit(1)
+    cur = conn.cursor()
+    try:
+        cur.execute("use Dino_Game")
+    except mariadb.Error as e:
+        cur.execute("CREATE DATABASE Dino_Game")
+        cur.execute("use Dino_Game")
+        cur.execute("CREATE TABLE leaderboard(id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,name VARCHAR(9),score INT(10) UNSIGNED NOT NULL)")
+    cur.execute("INSERT INTO leaderboard(name,score) VALUES (?,?)", (name, score))
+    conn.commit()
+    conn.close()
 
-    order_scores('Scores.txt')
+
 
 
 def read_from_database(filename):
-    with open(filename) as file:
-        data = file.read().split('\n')
-        data.remove('')
-        for i in range(len(data)):
-            data[i] = data[i].split(',')
-        return data
-
-
+    # with open(filename) as file:
+    #     data = file.read().split('\n')
+    #     data.remove('')
+    #     for i in range(len(data)):
+    #         data[i] = data[i].split(',')
+    #     return data
+    data = []
+    try:
+        conn = mariadb.connect(
+            user="root",
+            password="kubasam",
+            host="127.0.0.1",
+        )
+    except mariadb.Error as e:
+        print(f"Error connecting to MariaDB Platform: {e}")
+        sys.exit(1)
+    cur = conn.cursor()
+    cur.execute("use Dino_Game")
+    cur.execute("SELECT name,score FROM leaderboard ORDER BY score DESC")
+    for (name, score) in cur:
+        data.append((name,str(score)))
+    conn.close()
+    return data
 
 def deathScreen():
 
@@ -395,6 +432,7 @@ def top_players()->None:
         pygame.display.update()
 
 
+
 def options():
     """
     function to draw and handle options screen
@@ -457,15 +495,19 @@ def options():
                 exit(0)
 
         if return_button.is_clicked():
+           if validate(game_speed_textbox.value,speed_increase_textbox.value,small_cactus_prob_textbox.value,large_cactus_prob_textbox.value,bird_prob_textbox.value):
             #set parameters
-            GAME_SPEED = int(game_speed_textbox.value)
-            increase_after_points = int(speed_increase_textbox.value)
-            small_cactus_prob = int(small_cactus_prob_textbox.value) / 100
-            large_cactus_prob = int(large_cactus_prob_textbox.value) / 100
-            bird_prob = int(bird_prob_textbox.value) / 100
+                GAME_SPEED = int(game_speed_textbox.value)
+                increase_after_points = int(speed_increase_textbox.value)
+                small_cactus_prob = int(small_cactus_prob_textbox.value) / 100
+                large_cactus_prob = int(large_cactus_prob_textbox.value) / 100
+                bird_prob = int(bird_prob_textbox.value) / 100
+                mainMenu()
+           else:
+                Tk().wm_withdraw()  # to hide the main window
+                messagebox.showinfo('error'
+                                    , 'make sure that all the settings are integers and that probabilities adds up to 100')
 
-            mainMenu()
-            return
         #blit labels every frame
         SCREEN.blit(text, text_rect)
         SCREEN.blit(game_speed_label, game_speed_label_rect)
