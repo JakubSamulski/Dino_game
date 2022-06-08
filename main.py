@@ -1,21 +1,14 @@
 from typing import Sequence, Union
-
 import pygame
-import os
-import pygame_textinput
-import time
-import sys
 import mariadb
 import random
 from tkinter import *
 from tkinter import messagebox
 from pygame.surface import SurfaceType
-
 from CustomTextbox import Textbox
 from Button import Button
 
 # Constants
-
 
 pygame.init()
 SCREEN_H = 729
@@ -211,7 +204,7 @@ class Dinosaur:
         :return:
         """
         SCREEN.blit(self.image, (self.dino_rect.x, self.dino_rect.y))
-        pygame.draw.rect(SCREEN, (255, 0, 0), self.dino_rect, 2)
+
 
 
 class Obstacle:
@@ -244,7 +237,6 @@ class Obstacle:
          None
         """
         SCREEN.blit(self.image[self.type], self.rect)
-        pygame.draw.rect(SCREEN, (255, 0, 0), self.rect, 2)
 
 
 class SmallCactus(Obstacle):
@@ -274,7 +266,6 @@ class Bird(Obstacle):
             self.index = 0
 
         SCREEN.blit(self.image[self.index // 10], self.rect)
-        pygame.draw.rect(SCREEN, (255, 0, 0), self.rect, 2)
         self.index += 1
 
 def validate(gamespeed:str,increase_afer:str,prob1:str,prob2:str,prob3:str)->bool:
@@ -300,6 +291,7 @@ def write_scores(list,filename):
 
 
 def write_to_database(name,score):
+    name = name[:9]
     try:
         conn = mariadb.connect(
             user="root",
@@ -366,7 +358,6 @@ def deathScreen():
     deadDino_rotated = pygame.transform.rotate(DINO_DEAD, 180)
 
     main_menu_button = Button(SCREEN, 550, 570, 220, 75, "Play Again")
-    print(name, score)
     while True:
         SCREEN.fill((255, 255, 255))
         SCREEN.blit(text, text_rect)
@@ -619,7 +610,6 @@ def main():
         SCREEN.blit(text, text_rect)
 
 
-
     def background():
         """
         Function to handle background of the game
@@ -653,7 +643,6 @@ def main():
                 pygame.quit()
                 exit(0)
                 run = False
-
 
         # draw stuff
         SCREEN.fill((255, 255, 255))
@@ -689,7 +678,6 @@ def main():
         #set frame rate
         clock.tick(60)
         pygame.display.update()
-
 
 if __name__ == '__main__':
     mainMenu()
