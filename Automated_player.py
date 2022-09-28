@@ -16,10 +16,10 @@ def run() -> None:
     while True:
         if keyboard.is_pressed('alt+k') and not activated:
             activated = True
-            print("dziala")
+            print("works")
         elif keyboard.is_pressed('alt+l') and activated:
             activated = False
-            print("nie dziaala")
+            print("not")
             time.sleep(0.6)
         elif keyboard.is_pressed('alt+q'):
             exit(0)
@@ -31,10 +31,7 @@ def run() -> None:
             # we need more than one pixel because i could archive faster screenshots than 12/s so it isnt guaranteed to
             # catch obstacle everytime, also that's why this bot has some limitations such as it almost always fails when
             # large cactus's are at the beginning (we have to setup multiple control pixels so this means (too) early jumps
-            # p1 = im.getpixel((560 + offset, 530))
-            # p2 = im.getpixel((580 + offset, 525))
-            # p3 = im.getpixel((600 + offset, 500))
-            # p4 = im.getpixel((610 + offset, 500))
+
 
             p1 = im.getpixel((598 + offset, 850))
             p2 = im.getpixel((700 + offset, 845))
@@ -58,7 +55,6 @@ def run() -> None:
                 time.sleep(1)
                 pyautogui.keyUp("down")
 
-#run()
 counter=0
 while True:
     counter+=1

@@ -5,7 +5,7 @@ import random
 from tkinter import *
 from tkinter import messagebox
 from pygame.surface import SurfaceType
-from CustomTextbox import Textbox
+from CustomTextbox import Textboxpip3 freeze > requirements.txt
 from Button import Button
 
 # Constants
